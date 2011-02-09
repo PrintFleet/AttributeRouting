@@ -76,3 +76,7 @@ Scenario: Specifying route precedence within a controller using the RouteAttribu
 	Then the 1st route url is "Route1"
 	 And the 2nd route url is "Route2"
 	 And the 3rd route url is "Route3"
+	 
+Scenario: Redirecting to the default route for an action using the RouteAttribute Redirect property
+	When I fetch the routes for the Test controller's Redirect action
+	Then the route "Test/Redirect301" redirects to "Test/Redirect"

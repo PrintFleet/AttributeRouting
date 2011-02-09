@@ -313,6 +313,23 @@ this.ScenarioSetup(scenarioInfo);
 #line hidden
             testRunner.CollectScenarioErrors();
         }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Redirecting to the default route for an action using the RouteAttribute Redirect " +
+            "property")]
+        public virtual void RedirectingToTheDefaultRouteForAnActionUsingTheRouteAttributeRedirectProperty()
+        {
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Redirecting to the default route for an action using the RouteAttribute Redirect " +
+                    "property", ((string[])(null)));
+#line 80
+this.ScenarioSetup(scenarioInfo);
+#line 81
+ testRunner.When("I fetch the routes for the Test controller\'s Redirect action");
+#line 82
+ testRunner.Then("the route \"Test/Redirect301\" redirects to \"Test/Redirect\"");
+#line hidden
+            testRunner.CollectScenarioErrors();
+        }
     }
 }
 #endregion

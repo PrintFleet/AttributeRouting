@@ -56,6 +56,8 @@
   <ItemGroup>
     <Compile Include="Extensions\ReflectionExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Framework\RedirectHttpHandler.cs" />
+    <Compile Include="Framework\RedirectRouteHandler.cs" />
     <Compile Include="RestfulRouteConventionAttribute.cs" />
     <Compile Include="Framework\RouteBuilder.cs" />
     <Compile Include="Framework\AttributeRoutingException.cs" />

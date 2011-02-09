@@ -35,7 +35,8 @@ namespace AttributeRouting.Framework
                                       CreateRouteDefaults(routeSpec),
                                       CreateRouteConstraints(routeSpec),
                                       CreateRouteDataTokens(routeSpec),
-                                      _configuration.UseLowercaseRoutes);
+                                      _configuration.UseLowercaseRoutes,
+                                      GetRouteHandler(routeSpec));
         }
 
         private string CreateRouteName(RouteSpecification routeSpec)
@@ -147,6 +148,16 @@ namespace AttributeRouting.Framework
             }
 
             return dataTokens;
+        }
+
+        private IRouteHandler GetRouteHandler(RouteSpecification routeSpec)
+        {
+            if (routeSpec.RedirectRouteSpecification == null)
+                return new MvcRouteHandler();
+
+            var url = CreateRouteUrl(routeSpec.RedirectRouteSpecification);
+            
+            return new RedirectRouteHandler(url);
         }
 
         private static string DetokenizeUrl(string url)

@@ -42,5 +42,12 @@ namespace AttributeRouting.Specs.Subjects
         {
             return Content("");
         }
+
+        [GET("Test/Redirect", Order = 1)]
+        [GET("Test/Redirect301", Order=2, Redirect = true)]
+        public ActionResult Redirect()
+        {
+            return Content("");
+        }
     }
 }

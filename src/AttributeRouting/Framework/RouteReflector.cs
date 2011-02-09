@@ -43,7 +43,8 @@ namespace AttributeRouting.Framework
                     let controllerIndex = controllerCount++
                     let convention = controllerType.GetCustomAttribute<RouteConventionAttribute>(false)
                     from actionMethod in controllerType.GetActionMethods()
-                    from routeAttribute in GetRouteAttributes(actionMethod, convention)
+                    let routeAttributes = GetRouteAttributes(actionMethod, convention)
+                    from routeAttribute in routeAttributes
                     orderby controllerIndex , routeAttribute.Precedence
                     // precedence is within a controller
                     let routeName = routeAttribute.RouteName
@@ -61,7 +62,8 @@ namespace AttributeRouting.Framework
                         DefaultAttributes = GetDefaultAttributes(actionMethod, routeName, convention),
                         ConstraintAttributes = GetConstraintAttributes(actionMethod, routeName, convention),
                         RouteName = routeName,
-                        IsAbsoluteUrl = routeAttribute.IsAbsoluteUrl
+                        IsAbsoluteUrl = routeAttribute.IsAbsoluteUrl,
+                        RedirectRouteSpecification = GetRedirectRouteSpecification(routeAttribute, actionMethod, routeAttributes, convention)
                     }).ToList();
         }
 
@@ -149,6 +151,25 @@ namespace AttributeRouting.Framework
                 constraintAttributes.AddRange(convention.GetRouteConstraintAtributes(actionMethod));
 
             return constraintAttributes.ToList();
+        }
+
+        private static RouteSpecification GetRedirectRouteSpecification(RouteAttribute routeAttribute,
+                                                                        MethodInfo actionMethod,
+                                                                        IEnumerable<RouteAttribute> routeAttributesForAction,
+                                                                        RouteConventionAttribute convention)
+        {
+            if (!routeAttribute.Redirect)
+                return null;
+
+            var redirectRouteAttribute = routeAttributesForAction.First();
+            var redirectRouteSpec = new RouteSpecification
+            {
+                AreaUrl = GetAreaUrl(actionMethod),
+                RoutePrefix = GetRoutePrefix(actionMethod, convention),
+                Url = redirectRouteAttribute.Url
+            };
+
+            return redirectRouteSpec;
         }
     }
 }

@@ -8,12 +8,12 @@ namespace AttributeRouting.Framework
         private readonly bool _useLowercaseRoutes;
 
         public AttributeRoute(string url, RouteValueDictionary defaults, RouteValueDictionary constraints,
-                              RouteValueDictionary dataTokens, bool useLowercaseRoutes)
-            : this(null, url, defaults, constraints, dataTokens, useLowercaseRoutes) {}
+                              RouteValueDictionary dataTokens, bool useLowercaseRoutes, IRouteHandler handler)
+            : this(null, url, defaults, constraints, dataTokens, useLowercaseRoutes, handler) {}
 
         public AttributeRoute(string name, string url, RouteValueDictionary defaults, RouteValueDictionary constraints,
-                              RouteValueDictionary dataTokens, bool useLowercaseRoutes)
-            : base(url, defaults, constraints, dataTokens, new MvcRouteHandler())
+                              RouteValueDictionary dataTokens, bool useLowercaseRoutes, IRouteHandler handler)
+            : base(url, defaults, constraints, dataTokens, handler)
         {
             Name = name;
             _useLowercaseRoutes = useLowercaseRoutes;

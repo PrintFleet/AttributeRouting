@@ -65,6 +65,11 @@ namespace AttributeRouting
         /// </summary>
         public bool IsAbsoluteUrl { get; set; }
 
+        /// <summary>
+        /// If true, issues a 301 redirect to the default route for this action when the current route is matched.
+        /// </summary>
+        public bool Redirect { get; set; }
+
         public override bool IsValidForRequest(ControllerContext controllerContext, MethodInfo methodInfo)
         {
             var httpMethod = (string)(controllerContext.RouteData.Values["httpMethod"] ??

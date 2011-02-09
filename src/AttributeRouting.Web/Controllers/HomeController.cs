@@ -9,7 +9,7 @@ namespace AttributeRouting.Web.Controllers
     public class HomeController : ControllerBase
     {
         [GET("", Order = 1)]
-        [GET("Home", Order = 2)]
+        [GET("Home", Order = 2, Redirect = true)]
         public ActionResult Index()
         {
             return View();

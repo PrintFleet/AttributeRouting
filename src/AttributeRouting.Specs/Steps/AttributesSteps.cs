@@ -144,5 +144,15 @@ namespace AttributeRouting.Specs.Steps
             Assert.That(route.DataTokens.ContainsKey(key), Is.True);
             Assert.That(route.DataTokens[key], Is.EqualTo(value));
         }
+
+        [Then(@"the route ""(.*)"" redirects to ""(.*)""")]
+        public void ThenTheRouteRedirectsTo(string originalUrl, string redirectUrl)
+        {
+            var route = _routes.FirstOrDefault(r => r.Url == originalUrl);
+
+            Assert.That(route, Is.Not.Null);
+            Assert.That(route.RouteHandler, Is.TypeOf(typeof(RedirectRouteHandler)));
+            Assert.That(((RedirectRouteHandler)route.RouteHandler).AbsoluteUrl, Is.EqualTo(redirectUrl));
+        }
     }
 }
