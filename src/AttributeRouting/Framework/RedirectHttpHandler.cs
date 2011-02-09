@@ -18,7 +18,6 @@ namespace AttributeRouting.Framework
 
         public void ProcessRequest(HttpContext httpContext)
         {
-
             httpContext.Response.RedirectPermanent(_url, true);
         }
     }
