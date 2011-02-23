@@ -109,6 +109,8 @@ namespace AttributeRouting.Logging
                                     (n1, n2) => n1 + ", " + n2);
                         else if (constraint.Value.GetType() == typeof(RegexRouteConstraint))
                             item.Constraints.Add(constraint.Key, ((RegexRouteConstraint)constraint.Value).Pattern);
+                        else if (constraint.Value.GetType() == typeof(CurrentUICultureConstraint))
+                            item.Constraints.Add(constraint.Key, ((CurrentUICultureConstraint)constraint.Value).CultureName);
                         else
                             item.Constraints.Add(constraint.Key, constraint.Value.ToString());
                     }

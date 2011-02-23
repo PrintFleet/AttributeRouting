@@ -88,7 +88,9 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountModels.cs" />
+    <Compile Include="Models\RouteTranslationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Models\RouteTranslation.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Admin\Views\Home\Index.aspx" />

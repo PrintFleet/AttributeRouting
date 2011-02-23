@@ -1,8 +1,11 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Web.Mvc;
 using System.Web.Routing;
 using AttributeRouting.Web.Controllers;
+using AttributeRouting.Web.Models;
 using ControllerBase = AttributeRouting.Web.Controllers.ControllerBase;
 
 namespace AttributeRouting.Web
@@ -12,6 +15,20 @@ namespace AttributeRouting.Web
 
     public class MvcApplication : System.Web.HttpApplication
     {
+        public MvcApplication()
+        {
+            BeginRequest += MvcApplication_BeginRequest;
+        }
+
+        void MvcApplication_BeginRequest(object sender, System.EventArgs e)
+        {
+            if (Request.UserLanguages != null && Request.UserLanguages.Any())
+            {
+                var cultureInfo = new CultureInfo(Request.UserLanguages[0]);
+                Thread.CurrentThread.CurrentUICulture = cultureInfo;
+            }
+        }
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -25,8 +42,16 @@ namespace AttributeRouting.Web
 
             routes.MapAttributeRoutes(config =>
             {
+                var translationProvider = new RouteTranslationProvider(
+                    "en", new[] { "en", "es", "fr" },
+                    new RouteTranslation("Home_About_RouteUrl", "About", "en"),
+                    new RouteTranslation("Home_About_RouteUrl", "Sobre", "es"),
+                    new RouteTranslation("Home_About_RouteUrl", "Presque", "fr")
+                    );
+
                 config.ScanAssemblyOf<ControllerBase>();
                 config.AddDefaultRouteConstraint(@"[Ii]d$", new RegexRouteConstraint(@"^\d+$"));
+                config.TranslationProvider = translationProvider;
             });
 
             routes.MapRoute("CatchAll",
