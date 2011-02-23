@@ -13,9 +13,9 @@ namespace AttributeRouting.Extensions
 
         public static string GetHttpMethod(this HttpRequestBase request)
         {
-            return request.Headers["X-HTTP-Method-Override"] ??
-                   request.Form["X-HTTP-Method-Override"] ??
-                   request.QueryString["X-HTTP-Method-Override"] ??
+            return request.Headers.SafeGet(h => h["X-HTTP-Method-Override"]) ??
+                   request.Form.SafeGet(f => f["X-HTTP-Method-Override"]) ??
+                   request.QueryString.SafeGet(q => q["X-HTTP-Method-Override"]) ??
                    request.HttpMethod;
         }
     }

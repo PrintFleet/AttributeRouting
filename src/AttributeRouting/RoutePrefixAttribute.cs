@@ -29,5 +29,7 @@ namespace AttributeRouting
         /// The url prefix to apply to the routes.
         /// </summary>
         public string Url { get; private set; }
+
+        public string UrlTranslationKey { get; set; }
     }
 }

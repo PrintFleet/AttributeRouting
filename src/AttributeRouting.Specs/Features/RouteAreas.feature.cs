@@ -73,7 +73,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 8
  testRunner.Then("the route url is \"Area/Index\"");
 #line 9
-  testRunner.And("the data token for \"area\" is \"Area\"");
+  testRunner.And("the route data token for \"area\" is \"Area\"");
 #line hidden
             testRunner.CollectScenarioErrors();
         }
@@ -120,7 +120,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 21
  testRunner.Then("the route url is \"ExplicitArea/Index\"");
 #line 22
-  testRunner.And("the data token for \"area\" is \"Area\"");
+  testRunner.And("the route data token for \"area\" is \"Area\"");
 #line hidden
             testRunner.CollectScenarioErrors();
         }
@@ -139,7 +139,7 @@ this.ScenarioSetup(scenarioInfo);
 #line 26
  testRunner.Then("the route url is \"ExplicitArea/DuplicatePrefix\"");
 #line 27
-  testRunner.And("the data token for \"area\" is \"Area\"");
+  testRunner.And("the route data token for \"area\" is \"Area\"");
 #line hidden
             testRunner.CollectScenarioErrors();
         }

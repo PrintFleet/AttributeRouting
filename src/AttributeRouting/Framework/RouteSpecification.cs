@@ -36,6 +36,8 @@ namespace AttributeRouting.Framework
         public ICollection<RouteConstraintAttribute> ConstraintAttributes { get; set; }
 
         public string RouteName { get; set; }
+        
+        public RouteTranslationKeys TranslationKeys { get; set; }
 
         public bool IsAbsoluteUrl { get; set; }
     }

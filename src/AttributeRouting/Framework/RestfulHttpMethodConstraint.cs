@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Web;
 using System.Web.Routing;
 using AttributeRouting.Extensions;
 
-namespace AttributeRouting
+namespace AttributeRouting.Framework
 {
     /// <summary>
     /// Constrains a route by the specified allowed HTTP methods.

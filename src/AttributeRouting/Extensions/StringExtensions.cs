@@ -16,6 +16,11 @@ namespace AttributeRouting.Extensions
             return !String.IsNullOrWhiteSpace(s);
         }
 
+        public static bool IsBlank(this string s)
+        {
+            return String.IsNullOrWhiteSpace(s);
+        }
+
         public static string FormatWith(this string s, params object[] args)
         {
             return String.Format(s, args);

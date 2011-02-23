@@ -60,6 +60,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions.cs" />
+    <Compile Include="Features\Localization.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Localization.feature</DependentUpon>
+    </Compile>
     <Compile Include="Features\Logging.feature.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -100,24 +105,31 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>StandardUsage.feature</DependentUpon>
     </Compile>
+    <Compile Include="Steps\LocalizationSteps.cs" />
     <Compile Include="Steps\RouteConstraintSteps.cs" />
     <Compile Include="Steps\RouteDefaultsSteps.cs" />
     <Compile Include="ScenarioContextExtensions.cs" />
     <Compile Include="Steps\RoutePrecedenceSteps.cs" />
     <Compile Include="Steps\SharedSteps.cs" />
     <Compile Include="Steps\StandardUsageSteps.cs" />
+    <Compile Include="Subjects\LocalizationControllers.cs" />
     <Compile Include="Subjects\RouteAreasControllers.cs" />
     <Compile Include="Subjects\RoutePrefixesControllers.cs" />
     <Compile Include="Subjects\RouteConstraintsController.cs" />
     <Compile Include="Subjects\RouteConventionsController.cs" />
     <Compile Include="Subjects\RouteDefaultsController.cs" />
-    <Compile Include="Subjects\RoutePrecedenceController.cs" />
+    <Compile Include="Subjects\RoutePrecedenceControllers.cs" />
     <Compile Include="Subjects\StandardUsageController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Steps\LoggingSteps.cs" />
+    <Compile Include="Subjects\TestTranslationProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Features\Localization.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Localization.feature.cs</LastGenOutput>
+    </None>
     <None Include="Features\Logging.feature">
       <Generator>SpecFlowSingleFileGenerator</Generator>
       <LastGenOutput>Logging.feature.cs</LastGenOutput>

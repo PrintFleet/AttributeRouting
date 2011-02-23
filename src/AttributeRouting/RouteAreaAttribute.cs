@@ -25,6 +25,8 @@ namespace AttributeRouting
             AreaName = areaName;
         }
 
+        public string AreaUrlTranslationKey { get; set; }
+
         /// <summary>
         /// The area name that is registered for the routes in the controller.
         /// </summary>

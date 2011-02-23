@@ -45,6 +45,8 @@ namespace AttributeRouting.Logging
                         value = ((RestfulHttpMethodConstraint)route.Constraints[key]).AllowedMethods.First();
                     else if (route.Constraints[key].GetType() == typeof(RegexRouteConstraint))
                         value = ((RegexRouteConstraint)route.Constraints[key]).Pattern;
+                    else if (route.Constraints[key].GetType() == typeof(CurrentUICultureConstraint))
+                        value = ((CurrentUICultureConstraint)route.Constraints[key]).CultureName;
                     else
                         value = route.Constraints[key];
 

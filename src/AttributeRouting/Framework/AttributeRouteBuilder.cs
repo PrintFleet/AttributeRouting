@@ -3,58 +3,79 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web.Mvc;
 using System.Web.Routing;
 using AttributeRouting.Extensions;
 
 namespace AttributeRouting.Framework
 {
-    public class RouteBuilder
+    public class AttributeRouteBuilder
     {
         private readonly AttributeRoutingConfiguration _configuration;
 
-        public RouteBuilder(AttributeRoutingConfiguration configuration)
+        public AttributeRouteBuilder(AttributeRoutingConfiguration configuration)
         {
             if (configuration == null) throw new ArgumentNullException("configuration");
 
             _configuration = configuration;
         }
 
-        public IEnumerable<AttributeRoute> BuildAllRoutes()
+        public IEnumerable<AttributeRoute> BuildRoutes()
         {
-            var routeReflector = new RouteReflector(_configuration);
-            var routeSpecs = routeReflector.GenerateRouteSpecifications();
+            var routeReflector = new RouteSpecificationBuilder(_configuration);
+            var routeSpecs = routeReflector.BuildSpecifications();
 
-            return routeSpecs.Select(Build);
+            if (_configuration.TranslationProvider == null)
+            {
+                foreach (var routeSpec in routeSpecs)
+                    yield return BuildRoute(routeSpec, null);
+            }
+            else
+            {
+                foreach (var routeSpec in routeSpecs)
+                    foreach (var cultureName in _configuration.TranslationProvider.AvailableCultureNames)
+                        yield return BuildRoute(routeSpec, cultureName);
+            }
         }
 
-        public AttributeRoute Build(RouteSpecification routeSpec)
+        public AttributeRoute BuildRoute(RouteSpecification routeSpec, string cultureName)
         {
-            return new AttributeRoute(CreateRouteName(routeSpec),
-                                      CreateRouteUrl(routeSpec),
-                                      CreateRouteDefaults(routeSpec),
-                                      CreateRouteConstraints(routeSpec),
-                                      CreateRouteDataTokens(routeSpec),
+            var routeName = GetRouteName(routeSpec, cultureName);
+
+            return new AttributeRoute(routeName,
+                                      GetRouteUrl(routeSpec, cultureName),
+                                      GetRouteDefaults(routeSpec),
+                                      GetRouteConstraints(routeSpec, cultureName),
+                                      GetRouteDataTokens(routeSpec, routeName),
                                       _configuration.UseLowercaseRoutes);
         }
 
-        private string CreateRouteName(RouteSpecification routeSpec)
+        private string GetRouteName(RouteSpecification routeSpec, string cultureName)
         {
+            var cultureNameArg = (cultureName.HasValue()) ? cultureName + "_" : null;
+
             if (routeSpec.RouteName.HasValue())
-                return routeSpec.RouteName;
+                return "{0}{1}".FormatWith(cultureNameArg, routeSpec.RouteName);
 
             if (_configuration.AutoGenerateRouteNames)
             {
-                var area = (routeSpec.AreaName.HasValue()) ? routeSpec.AreaName + "_" : null;
-                return "{0}{1}_{2}".FormatWith(area, routeSpec.ControllerName, routeSpec.ActionName);
+                var areaArg = (routeSpec.AreaName.HasValue()) ? routeSpec.AreaName + "_" : null;
+                return "{0}{1}{2}_{3}".FormatWith(cultureNameArg, areaArg, routeSpec.ControllerName, routeSpec.ActionName);
             }
 
             return null;
         }
 
-        private string CreateRouteUrl(RouteSpecification routeSpec)
+        private string GetRouteUrl(RouteSpecification routeSpec, string cultureName)
         {
-            var detokenizedUrl = DetokenizeUrl(routeSpec.Url);
+            var translationKeys = routeSpec.TranslationKeys;
+
+            var url = (translationKeys == null)
+                          ? routeSpec.Url
+                          : GetTranslation(routeSpec.Url, translationKeys.RouteUrlKey, cultureName);
+
+            var detokenizedUrl = DetokenizeUrl(url);
             var urlParameterNames = GetUrlParameterNames(detokenizedUrl);
 
             // {controller} and {action} tokens are not valid
@@ -73,17 +94,35 @@ namespace AttributeRouting.Framework
             // If this is not an absolute url, prefix with a route prefix or area name
             if (!routeSpec.IsAbsoluteUrl)
             {
-                if (routeSpec.RoutePrefix.HasValue() && !routeSpec.Url.StartsWith(routeSpec.RoutePrefix))
-                    urlBuilder.Insert(0, routeSpec.RoutePrefix + "/");
+                var routePrefix = (translationKeys == null)
+                                      ? routeSpec.RoutePrefix
+                                      : GetTranslation(routeSpec.RoutePrefix, translationKeys.RoutePrefixUrlKey, cultureName);
 
-                if (routeSpec.AreaUrl.HasValue() && !routeSpec.Url.StartsWith(routeSpec.AreaUrl))
-                    urlBuilder.Insert(0, routeSpec.AreaUrl + "/");
+                if (routePrefix.HasValue() && !routeSpec.Url.StartsWith(routePrefix))
+                    urlBuilder.Insert(0, routePrefix + "/");
+
+                var areaUrl = (translationKeys == null)
+                                  ? routeSpec.AreaUrl
+                                  : GetTranslation(routeSpec.AreaUrl, translationKeys.AreaUrlKey, cultureName);
+
+                if (areaUrl.HasValue() && !routeSpec.Url.StartsWith(areaUrl))
+                    urlBuilder.Insert(0, areaUrl + "/");
             }
 
             return urlBuilder.ToString().Trim('/');
         }
 
-        private RouteValueDictionary CreateRouteDefaults(RouteSpecification routeSpec)
+        private string GetTranslation(string defaultValue, string translationKey, string cultureName)
+        {
+            var translationProvider = _configuration.TranslationProvider;
+
+            if (translationProvider == null || translationKey.IsBlank() || cultureName.IsBlank())
+                return defaultValue;
+
+            return translationProvider.GetTranslation(translationKey, cultureName) ?? defaultValue;
+        }
+
+        private RouteValueDictionary GetRouteDefaults(RouteSpecification routeSpec)
         {
             var defaults = new RouteValueDictionary
             {
@@ -107,18 +146,27 @@ namespace AttributeRouting.Framework
             return defaults;
         }
 
-        private RouteValueDictionary CreateRouteConstraints(RouteSpecification routeSpec)
+        private RouteValueDictionary GetRouteConstraints(RouteSpecification routeSpec, string cultureName)
         {
             var constraints = new RouteValueDictionary();
 
             // Default constraints
             constraints.Add("httpMethod", new RestfulHttpMethodConstraint(routeSpec.HttpMethod));
 
+            var translationProvider = _configuration.TranslationProvider;
+            if (translationProvider != null)
+            {
+                constraints.Add("currentUICultureName",
+                                new CurrentUICultureConstraint(cultureName,
+                                                               translationProvider.DefaultCultureName,
+                                                               translationProvider.AvailableCultureNames));
+            }
+
             // Attribute-based constraints
             foreach (var constraintAttribute in routeSpec.ConstraintAttributes.Where(c => !constraints.ContainsKey(c.Key)))
                 constraints.Add(constraintAttribute.Key, constraintAttribute.Constraint);
 
-            var detokenizedUrl = DetokenizeUrl(CreateRouteUrl(routeSpec));
+            var detokenizedUrl = DetokenizeUrl(GetRouteUrl(routeSpec, cultureName));
             var urlParameterNames = GetUrlParameterNames(detokenizedUrl);
 
             // Convention-based constraints
@@ -133,7 +181,7 @@ namespace AttributeRouting.Framework
             return constraints;
         }
 
-        private RouteValueDictionary CreateRouteDataTokens(RouteSpecification routeSpec)
+        private RouteValueDictionary GetRouteDataTokens(RouteSpecification routeSpec, string routeName)
         {
             var dataTokens = new RouteValueDictionary
             {
@@ -144,6 +192,23 @@ namespace AttributeRouting.Framework
             {
                 dataTokens.Add("area", routeSpec.AreaName);
                 dataTokens.Add("UseNamespaceFallback", false);
+            }
+
+            if (routeName.HasValue())
+                dataTokens.Add("RouteName", routeName);
+
+            if (routeSpec.TranslationKeys != null)
+            {
+                var keys = routeSpec.TranslationKeys;
+                
+                if (keys.AreaUrlKey.HasValue())
+                    dataTokens.Add("AreaUrlTranslationKey", routeSpec.TranslationKeys.AreaUrlKey);
+                
+                if (keys.RoutePrefixUrlKey.HasValue())
+                    dataTokens.Add("RoutePrefixUrlTranslationKey", routeSpec.TranslationKeys.RoutePrefixUrlKey);
+
+                if (keys.RouteUrlKey.HasValue())
+                    dataTokens.Add("RouteUrlTranslationKey", routeSpec.TranslationKeys.RouteUrlKey);
             }
 
             return dataTokens;

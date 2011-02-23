@@ -35,6 +35,8 @@ namespace AttributeRouting
             Precedence = int.MaxValue;
         }
 
+        public string UrlTranslationKey { get; set; }
+
         /// <summary>
         /// The url for this action.
         /// </summary>

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using AttributeRouting.Framework;
 using NUnit.Framework;
 using TechTalk.SpecFlow;
 
@@ -7,20 +8,6 @@ namespace AttributeRouting.Specs.Steps
     [Binding]
     public class StandardUsageSteps
     {
-        [Then(@"the (?:(\d+)(?:st|nd|rd|th)\s)?route(?:'s)? url is ""(.*)""")]
-        public void ThenTheRouteUrlIs(string nth, string url)
-        {
-            var i = nth.HasValue() ? int.Parse(nth) - 1 : 0;
-            var routes = ScenarioContext.Current.GetFetchedRoutes();
-
-            Assert.That(routes.Count(), Is.GreaterThan(i), "There is no {0} route available.", nth);
-
-            var route = routes.ElementAt(i);
-
-            Assert.That(route, Is.Not.Null);
-            Assert.That(route.Url, Is.EqualTo(url));
-        }
-
         [Then(@"the default for ""(.*?)"" is ""(.*?)""")]
         public void ThenTheDefaultForIs(string key, object value)
         {

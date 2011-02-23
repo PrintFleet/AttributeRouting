@@ -15,5 +15,25 @@ namespace AttributeRouting.Specs
         {
             return context.Get<IEnumerable<Route>>("FetchedRoutes");
         }
+        
+        public static void SetConfiguration(this ScenarioContext context, AttributeRoutingConfiguration configuration)
+        {
+            context.Set(configuration, "Configuration");
+        }
+
+        public static AttributeRoutingConfiguration GetConfiguration(this ScenarioContext context)
+        {
+            return context.Get<AttributeRoutingConfiguration>("Configuration");
+        }
+        
+        public static void SetRouteData(this ScenarioContext context, RouteData routeData)
+        {
+            context.Set(routeData, "RouteData");
+        }
+
+        public static RouteData GetRouteData(this ScenarioContext context)
+        {
+            return context.Get<RouteData>("RouteData");
+        }
     }
 }
