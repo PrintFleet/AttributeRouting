@@ -23,19 +23,29 @@ namespace AttributeRouting.Framework
         public IEnumerable<AttributeRoute> BuildAllRoutes()
         {
             var routeReflector = new RouteReflector(_configuration);
-            var routeSpecs = routeReflector.GenerateRouteSpecifications();
+            var routeSpecs = routeReflector.GenerateRouteSpecifications().ToList();
+            var mappedSubdomains = routeSpecs.Where(s => s.Subdomain.HasValue()).Select(s => s.Subdomain).Distinct().ToList();
 
-            return routeSpecs.Select(Build);
+            return routeSpecs.Select(s =>
+            {
+                var route = Build(s);
+                route.MappedSubdomains = mappedSubdomains;
+                return route;
+            });
         }
 
         public AttributeRoute Build(RouteSpecification routeSpec)
         {
-            return new AttributeRoute(CreateRouteName(routeSpec),
-                                      CreateRouteUrl(routeSpec),
-                                      CreateRouteDefaults(routeSpec),
-                                      CreateRouteConstraints(routeSpec),
-                                      CreateRouteDataTokens(routeSpec),
-                                      _configuration.UseLowercaseRoutes);
+            return new AttributeRoute(
+                CreateRouteUrl(routeSpec),
+                CreateRouteDefaults(routeSpec),
+                CreateRouteConstraints(routeSpec),
+                CreateRouteDataTokens(routeSpec))
+            {
+                Subdomain = routeSpec.Subdomain ?? _configuration.DefaultSubdomain,
+                Name = CreateRouteName(routeSpec),
+                Configuration = _configuration
+            };
         }
 
         private string CreateRouteName(RouteSpecification routeSpec)
@@ -55,7 +65,7 @@ namespace AttributeRouting.Framework
         private string CreateRouteUrl(RouteSpecification routeSpec)
         {
             var detokenizedUrl = DetokenizeUrl(routeSpec.Url);
-            var urlParameterNames = GetUrlParameterNames(detokenizedUrl);
+            var urlParameterNames = detokenizedUrl.GetUrlParameterContents();
 
             // {controller} and {action} tokens are not valid
             if (urlParameterNames.Any(n => n.ValueEquals("controller")))
@@ -101,7 +111,7 @@ namespace AttributeRouting.Framework
                 { "action", routeSpec.ActionName }
             };
 
-            var urlParameters = GetUrlParameterContents(routeSpec.Url);
+            var urlParameters = routeSpec.Url.GetUrlParameterContents();
 
             // Inspect the url for optional parameters, specified with a leading or trailing (or both) ?
             foreach (var parameter in urlParameters.Where(p => Regex.IsMatch(p, @"^\?|\?$")))
@@ -147,7 +157,7 @@ namespace AttributeRouting.Framework
                 constraints.Add("httpMethod", new RestfulHttpMethodConstraint(routeSpec.HttpMethods));
 
             // Inline constraints
-            foreach (var parameter in GetUrlParameterContents(routeSpec.Url).Where(p => Regex.IsMatch(p, @"^.*\(.*\)$")))
+            foreach (var parameter in routeSpec.Url.GetUrlParameterContents().Where(p => Regex.IsMatch(p, @"^.*\(.*\)$")))
             {
                 var indexOfOpenParen = parameter.IndexOf('(');
                 var parameterName = parameter.Substring(0, indexOfOpenParen);
@@ -169,7 +179,7 @@ namespace AttributeRouting.Framework
             }
 
             var detokenizedUrl = DetokenizeUrl(CreateRouteUrl(routeSpec));
-            var urlParameterNames = GetUrlParameterNames(detokenizedUrl);
+            var urlParameterNames = detokenizedUrl.GetUrlParameterContents();
 
             // Convention-based constraints
             foreach (var defaultConstraint in _configuration.DefaultRouteConstraints)
@@ -215,26 +225,6 @@ namespace AttributeRouting.Framework
             };
 
             return Regex.Replace(url, String.Join("|", patterns), "");
-        }
-
-        private static IEnumerable<string> GetUrlParameterNames(string url)
-        {
-            if (!url.HasValue())
-                return Enumerable.Empty<string>();
-
-            return (from urlPart in url.SplitAndTrim(new[] { "/" })
-                    from match in Regex.Matches(urlPart, @"(?<={).*(?=})").Cast<Match>()
-                    select match.Captures[0].ToString()).ToList();
-        }
-
-        private static IEnumerable<string> GetUrlParameterContents(string url)
-        {
-            if (!url.HasValue())
-                return Enumerable.Empty<string>();
-
-            return (from urlPart in url.SplitAndTrim(new[] { "/" })
-                    from match in Regex.Matches(urlPart, @"(?<={).*(?=})").Cast<Match>()
-                    select match.Captures[0].ToString()).ToList();
         }
     }
 }

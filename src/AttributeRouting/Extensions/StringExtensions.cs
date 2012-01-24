@@ -17,6 +17,11 @@ namespace AttributeRouting.Extensions
             return !String.IsNullOrWhiteSpace(s);
         }
 
+        public static bool HasNoValue(this string s)
+        {
+            return String.IsNullOrWhiteSpace(s);
+        }
+
         public static string FormatWith(this string s, params object[] args)
         {
             return String.Format(s, args);
@@ -46,6 +51,16 @@ namespace AttributeRouting.Extensions
             var invalidUrlPattern = String.Join("|", invalidUrlPatterns);
 
             return !urlParts.Any(p => Regex.IsMatch(p, invalidUrlPattern));
+        }
+
+        public static IEnumerable<string> GetUrlParameterContents(this string url)
+        {
+            if (!url.HasValue())
+                return Enumerable.Empty<string>();
+
+            return (from urlPart in url.SplitAndTrim(new[] { "/" })
+                    from match in Regex.Matches(urlPart, @"(?<={).*(?=})").Cast<Match>()
+                    select match.Captures[0].ToString()).ToList();
         }
     }
 }

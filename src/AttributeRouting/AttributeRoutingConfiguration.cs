@@ -18,11 +18,13 @@ namespace AttributeRouting
         /// </summary>
         public AttributeRoutingConfiguration()
         {
-            UseLowercaseRoutes = false;
-            DefaultRouteConstraints = new Dictionary<string, IRouteConstraint>();
-
             Assemblies = new List<Assembly>();
             PromotedControllerTypes = new List<Type>();
+
+            UseLowercaseRoutes = false;
+            DefaultRouteConstraints = new Dictionary<string, IRouteConstraint>();
+            SubdomainMatchPattern = @"^(([\w\-]+)\.)?[\w\-]+\.[\w\-]+$";
+            DefaultSubdomain = "www";
         }
 
         internal List<Assembly> Assemblies { get; set; }
@@ -40,6 +42,21 @@ namespace AttributeRouting
         /// The default is false.
         /// </summary>
         public bool AutoGenerateRouteNames { get; set; }
+
+        /// <summary>
+        /// Customize the pattern used to match subdomain names when using areas with subdomains.
+        /// The default is "^(([\w\-]+)\.)?[\w\-]+\.[\w\-]+$",
+        /// which matches hostnames in the form sub.domain.com and captures the value "sub" for the subdomain.
+        /// </summary>
+        public string SubdomainMatchPattern { get; set; }
+
+        /// <summary>
+        /// Specify the default subdomain for this application.
+        /// This is used when matching dynamic subdomains, 
+        /// in order to differentiate a dynamic subdomain from the default subdomain of the site.
+        /// The default is www.
+        /// </summary>
+        public string DefaultSubdomain { get; set; }
 
         /// <summary>
         /// Scans the assembly of the specified controller for routes to register.

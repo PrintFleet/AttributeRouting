@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttributeRouting.Specs", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttributeRouting.Web", "AttributeRouting.Web\AttributeRouting.Web.csproj", "{486087C6-E95B-4FE2-8263-7B6B2DF81888}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{95D4CEFF-4D95-4907-9E03-E88125244439}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttributeRouting.Subdomains.Web", "AttributeRouting.Subdomains.Web\AttributeRouting.Subdomains.Web.csproj", "{781C6613-CFEE-4591-9C2B-F354F63D0C7C}"
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -29,8 +33,16 @@ Global
 		{486087C6-E95B-4FE2-8263-7B6B2DF81888}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{486087C6-E95B-4FE2-8263-7B6B2DF81888}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{486087C6-E95B-4FE2-8263-7B6B2DF81888}.Release|Any CPU.Build.0 = Release|Any CPU
+		{781C6613-CFEE-4591-9C2B-F354F63D0C7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{781C6613-CFEE-4591-9C2B-F354F63D0C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{781C6613-CFEE-4591-9C2B-F354F63D0C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{781C6613-CFEE-4591-9C2B-F354F63D0C7C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{486087C6-E95B-4FE2-8263-7B6B2DF81888} = {95D4CEFF-4D95-4907-9E03-E88125244439}
+		{781C6613-CFEE-4591-9C2B-F354F63D0C7C} = {95D4CEFF-4D95-4907-9E03-E88125244439}
 	EndGlobalSection
 EndGlobal

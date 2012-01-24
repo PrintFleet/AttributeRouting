@@ -13,6 +13,8 @@ namespace AttributeRouting.Framework
             ConstraintAttributes = new List<RouteConstraintAttribute>();
         }
 
+        public string Subdomain { get; set; }
+
         public string AreaName { get; set; }
 
         public string AreaUrl { get; set; }

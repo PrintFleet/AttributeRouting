@@ -42,16 +42,19 @@ namespace AttributeRouting.Framework
             return (from controllerType in controllerTypes
                     let controllerIndex = controllerCount++
                     let convention = controllerType.GetCustomAttribute<RouteConventionAttribute>(false)
+                    let routeAreaAttribute = controllerType.GetCustomAttribute<RouteAreaAttribute>(true)
+                    let routePrefixAttribute = controllerType.GetCustomAttribute<RoutePrefixAttribute>(true)
                     from actionMethod in controllerType.GetActionMethods()
                     from routeAttribute in GetRouteAttributes(actionMethod, convention)
-                    orderby controllerIndex , routeAttribute.Precedence
                     // precedence is within a controller
+                    orderby controllerIndex, routeAttribute.Precedence
                     let routeName = routeAttribute.RouteName
                     select new RouteSpecification
                     {
-                        AreaName = GetAreaName(actionMethod),
-                        AreaUrl = GetAreaUrl(actionMethod),
-                        RoutePrefix = GetRoutePrefix(actionMethod, convention),
+                        Subdomain = GetSubdomain(routeAreaAttribute),
+                        AreaName = GetAreaName(routeAreaAttribute),
+                        AreaUrl = GetAreaUrl(routeAreaAttribute),
+                        RoutePrefix = GetRoutePrefix(routePrefixAttribute, convention, actionMethod),
                         ControllerType = controllerType,
                         ControllerName = controllerType.GetControllerName(),
                         ActionName = actionMethod.Name,
@@ -65,8 +68,7 @@ namespace AttributeRouting.Framework
                     }).ToList();
         }
 
-        private static IEnumerable<RouteAttribute> GetRouteAttributes(MethodInfo actionMethod,
-                                                                      RouteConventionAttribute convention)
+        private static IEnumerable<RouteAttribute> GetRouteAttributes(MethodInfo actionMethod, RouteConventionAttribute convention)
         {
             var attributes = new List<RouteAttribute>();
 
@@ -80,28 +82,40 @@ namespace AttributeRouting.Framework
             return attributes.OrderBy(a => a.Order);
         }
 
-        private static string GetAreaName(MethodInfo actionMethod)
+        private static string GetSubdomain(RouteAreaAttribute routeAreaAttribute)
         {
-            var routeAreaAttribute = actionMethod.DeclaringType.GetCustomAttribute<RouteAreaAttribute>(true);
+            if (routeAreaAttribute == null)
+                return null;
+
+            return routeAreaAttribute.Subdomain;
+        }
+
+        private static string GetAreaName(RouteAreaAttribute routeAreaAttribute)
+        {
             if (routeAreaAttribute == null)
                 return null;
 
             return routeAreaAttribute.AreaName;
         }
 
-        private static string GetAreaUrl(MethodInfo actionMethod)
+        private static string GetAreaUrl(RouteAreaAttribute routeAreaAttribute)
         {
-            var routeAreaAttribute = actionMethod.DeclaringType.GetCustomAttribute<RouteAreaAttribute>(true);
             if (routeAreaAttribute == null)
+                return null;
+
+            // If a subdomain is specified for the area, then assume the area url is blank;
+            // eg: admin.badass.com.
+            // However, our fearless coder can decide to explicitly specify an area url if desired;
+            // eg: internal.badass.com/admin.
+            if (routeAreaAttribute.Subdomain.HasValue() && routeAreaAttribute.AreaUrl.HasNoValue())
                 return null;
 
             return routeAreaAttribute.AreaUrl ?? routeAreaAttribute.AreaName;
         }
 
-        private static string GetRoutePrefix(MethodInfo actionMethod, RouteConventionAttribute convention)
+        private static string GetRoutePrefix(RoutePrefixAttribute routePrefixAttribute, RouteConventionAttribute convention, MethodInfo actionMethod)
         {
             // Return an explicitly defined route prefix, if defined
-            var routePrefixAttribute = actionMethod.DeclaringType.GetCustomAttribute<RoutePrefixAttribute>(true);
             if (routePrefixAttribute != null)
                 return routePrefixAttribute.Url;
 
@@ -112,8 +126,7 @@ namespace AttributeRouting.Framework
             return "";
         }
 
-        private static ICollection<RouteDefaultAttribute> GetDefaultAttributes(MethodInfo actionMethod, string routeName,
-                                                                               RouteConventionAttribute convention)
+        private static ICollection<RouteDefaultAttribute> GetDefaultAttributes(MethodInfo actionMethod, string routeName, RouteConventionAttribute convention)
         {
             var defaultAttributes = new List<RouteDefaultAttribute>();
 
@@ -131,9 +144,7 @@ namespace AttributeRouting.Framework
             return defaultAttributes.ToList();
         }
 
-        private static ICollection<RouteConstraintAttribute> GetConstraintAttributes(MethodInfo actionMethod,
-                                                                                     string routeName,
-                                                                                     RouteConventionAttribute convention)
+        private static ICollection<RouteConstraintAttribute> GetConstraintAttributes(MethodInfo actionMethod, string routeName, RouteConventionAttribute convention)
         {
             var constraintAttributes = new List<RouteConstraintAttribute>();
 

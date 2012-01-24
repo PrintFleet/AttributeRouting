@@ -28,5 +28,11 @@ namespace AttributeRouting
         /// The url prefix to apply to the routes.
         /// </summary>
         public string AreaUrl { get; set; }
+
+        /// <summary>
+        /// The subdomain that this area applies to.
+        /// By default, areas apply to all subdomains.
+        /// </summary>
+        public string Subdomain { get; set; }
     }
 }
