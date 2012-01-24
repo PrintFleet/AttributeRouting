@@ -42,7 +42,7 @@ namespace AttributeRouting.Framework
                 CreateRouteConstraints(routeSpec),
                 CreateRouteDataTokens(routeSpec))
             {
-                Subdomain = routeSpec.Subdomain ?? _configuration.DefaultSubdomain,
+                Subdomain = routeSpec.Subdomain,
                 Name = CreateRouteName(routeSpec),
                 Configuration = _configuration
             };

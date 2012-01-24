@@ -58,8 +58,9 @@ namespace AttributeRouting.Framework
             }
 
             // If this route is mapped to the requested host's subdomain, 
+            // or if the route is not mapped to a subdomain and the requested host's subdomain is equal to the default subdomain,
             // then return the route data for this request.
-            if (Subdomain.ValueEquals(subdomain))
+            if ((Subdomain ?? Configuration.DefaultSubdomain).ValueEquals(subdomain))
                 return base.GetRouteData(httpContext);
 
             // Otherwise, return null, which will prevent this route from being matched for the request.
